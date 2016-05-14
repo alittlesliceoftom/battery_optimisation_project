@@ -86,25 +86,29 @@ def chargeController(Battery,charge):
     if charge <0:
         if Battery.availableDischarge<-charge:    ##  should this be in battery object?
             print 'discharge of ' + str(-charge) + ' cannot be met, outputting max discharge of'
-            charge = -Battery.availableDischarge
+            charge = -Battery.availableDischarge*0.9999 #avoids rounding errors
             print str(-charge) + ' KWh'
     elif charge >0:
         if Battery.availableCharge<charge:    ##  should this be in battery object?
             print 'charge of ' + str(charge) + ' cannot be met, outputting max discharge of'
-            charge = Battery.availableCharge
+            charge = Battery.availableCharge*0.9999 #avoids rounding errors
             print str(charge) + ' KWh'
     return charge
 
  
 def randomChargeTest(Battery, length = 1000, mx = 500):
     import random as rd
+    import pandas as pd
+    df = pd.DataFrame(columns = ['Step','ChargeLevel', 'Load'])
     for i in range(length):
         jump = rd.random()* mx * rd.choice([-1,1])
         print 'load of ' + str(jump)
         charge = chargeController(Battery,jump)
         Battery.load(charge)
         print 'battery level of ' + str(Battery.charge)
-
+        df = df.append(pd.DataFrame(columns = ['Step','ChargeLevel', 'Load'], data = [[i,Battery.charge,charge]]))
+    df = df.set_index('Step')
+    return df
             
 def printResults():
     print ' battery charged by ' +str(test.totalCharges)
@@ -113,6 +117,11 @@ def printResults():
         
 test = Battery('test battery', 2000, 500)
 
-randomChargeTest(test)
+df = randomChargeTest(test)
 
 printResults()
+
+#import matplotlib as mpl
+#import pyplot as plt
+df.plot()
+plt.show()
