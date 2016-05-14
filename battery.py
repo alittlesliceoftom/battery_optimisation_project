@@ -46,6 +46,8 @@ class Battery(object):
             self.discharge(-load)
         if load>0:
             self.chargeUp(load)
+        self.availableDischarge = self.charge*self.importEff
+        self.availableCharge = (self.capacity-self.charge)/self.exportEff
         return self.charge
     
     def chargeUp(self, importAmount):
@@ -65,7 +67,7 @@ class Battery(object):
         if exportAmount <0:
             raise ValueError('Trying to discharge by negative amount')
         if self.charge-dischargeAmount <0:
-            raise RuntimeError('Battery discharge that much, can only discharge'+str(self.charge/self.exportEff))
+            raise RuntimeError('Battery can''t discharge that much, can only discharge'+str(self.charge/self.exportEff))
         self.charge -= dischargeAmount
         self.totals(exportAmount = exportAmount, dischargeAmount  = dischargeAmount)
         return self.charge
@@ -90,7 +92,7 @@ def chargeController(Battery,charge):
         if Battery.availableCharge<charge:    ##  should this be in battery object?
             print 'charge of ' + str(charge) + ' cannot be met, outputting max discharge of'
             charge = Battery.availableCharge
-            print charge + ' KWh'
+            print str(charge) + ' KWh'
     return charge
 
  
