@@ -13,9 +13,10 @@ class Battery(object):
         exportEff: Efficiency of importing power in decimal - default = importEff
         
     """
-    def __init__(self,name,capacity,powerIn, powerOut = None, DissipationRate = None, charge = None, importEff = None, exportEff = None):
-        self.name = name
-        self.capacity = capacity
+    def __init__(self,powerIn, powerOut = None, DissipationRate = None, charge = None, importEff = None, exportEff = None):
+        self.name = 'michal_default'
+        self.capacity = 1000
+
         self.powerIn = powerIn
         if powerOut is None:
             powerOut = powerIn
@@ -24,7 +25,7 @@ class Battery(object):
             DissipationRate = 0
         self.DissipationRate = DissipationRate
         if charge is None:
-            charge = capacity/2 #to make for easier initialisation
+            charge = self.get_capacity()/2 #to make for easier initialisation
         self.charge = charge
         if importEff is None:
             importEff = 0.925
@@ -37,7 +38,22 @@ class Battery(object):
         self.totalDischarges = 0
         self.availableDischarge = self.charge*self.importEff
         self.availableCharge = (self.capacity-self.charge)/self.exportEff
-        
+
+    def set_name(self, name):
+        self.name=name
+
+    def get_name(self):
+        return self.name
+
+    def set_capacity(self, capacity):
+        if capacity>10000 or capacity<0:
+            return 1/0
+
+        self.capacity = capacity
+
+    def get_capacity(self):
+        return self.capacity
+
     def load(self, load):
         """Expose the battery to a load - charge or discharge as appropriate"""
         if type(load) <> float:
@@ -115,13 +131,15 @@ def printResults():
     print ' battery discharged by ' +str( test.totalDischarges)
     print ' battery lost ' +str( test.loss)
         
-test = Battery('test battery', 2000, 500)
+test = Battery(500)
+test.set_name('test name')
+test.set_capacity(2000)
 
 df = randomChargeTest(test)
 
 printResults()
 
 #import matplotlib as mpl
-#import pyplot as plt
+import matplotlib.pyplot as plt
 df.plot()
 plt.show()
